@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,11 +11,13 @@
         body {
             padding: 20px;
         }
+
         .category-item {
             display: inline-block;
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <div id="category-list">
@@ -41,6 +44,10 @@
                 <label for="productPrice">Price</label>
                 <input type="number" class="form-control" id="productPrice" step="0.01" required>
             </div>
+            <div class="form-group">
+                <label for="productImage">Image</label>
+                <input type="file" class="form-control" id="productImage" step="0.01" required>
+            </div>
             <button type="submit" class="btn btn-primary">Add Product</button>
         </form>
     </div>
@@ -63,12 +70,17 @@
                 categoryList.innerHTML += `
                 <a href="#" class="badge badge-primary mr-2 d-inline" onclick="fetchProducts(${categories[i].id})">
                     ${categories[i].name} - ${categories[i].popularity}
-                </a>`;            }
+                </a>`;
+            }
         }
 
         async function fetchProducts(category_id) {
             try {
-                const response = await axios.get(`${HOST}/products/?category_id=${category_id}`); // Replace with your actual API URL
+                let url = `${HOST}/products/`
+                if (category_id) {
+                    url += `?category_id=${category_id}`
+                }
+                const response = await axios.get(url);
                 const products = response.data;
 
                 const productList = document.getElementById('product-list');
@@ -79,8 +91,10 @@
                     const productItem = document.createElement('a');
                     productItem.className = 'list-group-item list-group-item-action';
                     productItem.href = `/front/product.html?id=${product.id}`;
-                    productItem.innerHTML = `<strong>${product.name}</strong> - $${product.price}`;
-
+                    const categoryNames = product.category.map(cat => cat.name).join(', ');
+                    productItem.innerHTML = `<strong>${product.name}</strong> - $${product.price} - ${categoryNames} <br>
+                    <img src="${HOST}/${product.image}" alt="${product.name}">`;
+                    // <img src="${HOST}/${product.image.url}" alt="${product.name}">`;
 
                     // Create delete link with an onclick function
                     const deleteLink = document.createElement('a');
@@ -99,8 +113,8 @@
                             }
                         }
                     };
-                    
-                    productItem.appendChild(deleteLink);                    
+
+                    productItem.appendChild(deleteLink);
                     productList.appendChild(productItem);
                 }
             } catch (error) {
@@ -136,4 +150,5 @@
     </script>
 
 </body>
+
 </html>
